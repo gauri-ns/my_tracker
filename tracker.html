@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GATE Preparation Tracker</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+        th, td { border: 1px solid black; padding: 10px; text-align: center; }
+        .completed { background-color: lightgreen; }
+    </style>
+</head>
+<body>
+    <h2>GATE Preparation Tracker</h2>
+    <div id="tablesContainer"></div>
+    <p>Overall Completion: <span id="overallProgress">0%</span></p>
+    <p>Estimated Completion Date: <span id="completionDate">N/A</span></p>
+    
+    <script>
+        const subjects = {
+            "Engineering Mathematics": 30,
+            "Discrete Mathematics": 270,
+            "C Programming": 14,
+            "Aptitude": 12,
+            "Operating Systems": 35,
+            "COA": 35,
+            "DS": 27,
+            "TOC": 56,
+            "DBMS": 64,
+            "CN": 50,
+            "Digital Logic": 42,
+            "Algorithms": 42,
+            "Digital Logic 2": 24
+        };
+        
+        const lecturesPerDay = 2;
+        const totalLectures = Object.values(subjects).reduce((a, b) => a + b, 0);
+        
+        function loadTracker() {
+            const container = document.getElementById("tablesContainer");
+            container.innerHTML = "";
+            let totalCompleted = 0;
+            
+            for (const [subject, count] of Object.entries(subjects)) {
+                const table = document.createElement("table");
+                const header = `<tr><th colspan='2'>${subject}</th></tr><tr><th>Lecture No.</th><th>Completed</th></tr>`;
+                table.innerHTML = header;
+                
+                for (let i = 1; i <= count; i++) {
+                    const row = document.createElement("tr");
+                    const cell1 = document.createElement("td");
+                    cell1.textContent = `Lecture ${i}`;
+                    const cell2 = document.createElement("td");
+                    const checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.dataset.key = `${subject}_${i}`;
+                    
+                    if (localStorage.getItem(`${subject}_${i}`) === "true") {
+                        checkbox.checked = true;
+                        row.classList.add("completed");
+                        totalCompleted++;
+                    }
+                    
+                    checkbox.addEventListener("change", function() {
+                        localStorage.setItem(this.dataset.key, this.checked);
+                        loadTracker();
+                    });
+                    
+                    cell2.appendChild(checkbox);
+                    row.appendChild(cell1);
+                    row.appendChild(cell2);
+                    table.appendChild(row);
+                }
+                container.appendChild(table);
+            }
+            
+            const completionRate = (totalCompleted / totalLectures) * 100;
+            document.getElementById("overallProgress").textContent = completionRate.toFixed(2) + "%";
+            
+            if (totalCompleted > 0) {
+                const daysRemaining = (totalLectures - totalCompleted) / lecturesPerDay;
+                const today = new Date();
+                today.setDate(today.getDate() + daysRemaining);
+                document.getElementById("completionDate").textContent = today.toDateString();
+            } else {
+                document.getElementById("completionDate").textContent = "N/A";
+            }
+
+        }
+        document.addEventListener("DOMContentLoaded", loadTracker);
+    </script>
+    <h1>Desired date of completion: 1 August 2025</h1>
+</body>
+</html>
